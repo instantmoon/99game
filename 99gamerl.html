@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>汪汪隊：15KM 極速救援</title>
+    <title>汪汪隊：15KM 極速救援 (等級評定版)</title>
     <style>
         body { font-family: 'Arial', sans-serif; background: linear-gradient(180deg, #87CEEB 0%, #E0F7FA 100%); text-align: center; padding: 20px; min-height: 100vh; }
         #game-container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 4px solid #1e90ff; }
@@ -16,6 +16,7 @@
         button.action-btn { padding: 12px 25px; font-size: 1.2rem; cursor: pointer; background: #1e90ff; color: white; border: none; border-radius: 50px; margin: 8px; box-shadow: 0 4px 0 #104e8b; }
         #timer-display { font-size: 1.5rem; color: #ff0000; font-weight: bold; display: none; }
         .special-mode { background-color: #fff0f0 !important; border: 4px solid #ff0000 !important; }
+        .rank-medal { font-size: 4rem; font-weight: bold; color: #ffd700; margin: 10px 0; text-shadow: 2px 2px 0 #000; }
     </style>
 </head>
 <body>
@@ -24,9 +25,9 @@
     <h2 id="rank-display" style="margin: 0;">🐾 汪汪隊：救援準備</h2>
     
     <div id="setup-area">
-        <p>請選擇隊員 (15KM 挑戰)：</p>
-        <button class="action-btn" onclick="startGame('阿奇', '🚔')">出動阿奇！(得分x2)</button>
-        <button class="action-btn" onclick="startGame('毛毛', '🚒')" style="background-color: #f44336; box-shadow: 0 4px 0 #b71c1c;">出動毛毛！(補血型)</button>
+        <p>請選擇隊員 (目標 15KM)：</p>
+        <button class="action-btn" onclick="startGame('阿奇', '🚔')">出動阿奇！(得分加成)</button>
+        <button class="action-btn" onclick="startGame('毛毛', '🚒')" style="background-color: #f44336; box-shadow: 0 4px 0 #b71c1c;">出動毛毛！(機率補血)</button>
     </div>
 
     <div id="game-area" style="display:none;">
@@ -35,9 +36,9 @@
             <span>⭐ <span id="score">0</span></span>
         </div>
         <div class="progress-bar"><div id="progress-fill"></div></div>
-        <div style="font-size: 0.9rem; color: #666;">目標 15KM，剩餘: <span id="dist-remain">15</span> KM</div>
+        <div style="font-size: 0.9rem; color: #666;">進度: <span id="dist-count">0</span> / 15 KM</div>
         
-        <div id="timer-display">⏱️ 限時挑戰：<span id="seconds">10</span>s</div>
+        <div id="timer-display">⏱️ 限時加速中：<span id="seconds">10</span>s</div>
         <div id="event-log"></div>
         <div id="dog-display" style="font-size: 4rem; margin: 10px;">🐶</div>
         <div id="question-area"></div>
@@ -53,8 +54,11 @@
 
     <div id="end-area" style="display:none;">
         <h1 id="end-title">任務結束</h1>
-        <div id="end-stats" style="background: #f0f8ff; padding: 15px; border-radius: 15px; margin-bottom: 20px; text-align: left;">
-            <p id="end-rank"></p>
+        <div id="end-stats" style="background: #f0f8ff; padding: 15px; border-radius: 15px; margin-bottom: 20px;">
+            <div id="rank-medal" class="rank-medal">S</div>
+            <p id="end-rank-text" style="font-weight:bold; font-size:1.2rem;"></p>
+            <hr>
+            <p id="end-score"></p>
             <p id="end-time"></p>
         </div>
         <button class="action-btn" onclick="location.reload()">重新出發</button>
@@ -78,14 +82,14 @@
     function updateUI() {
         document.getElementById('hp').innerText = hp;
         document.getElementById('score').innerText = score;
-        document.getElementById('dist-remain').innerText = Math.max(0, MAX_DIST - dist);
+        document.getElementById('dist-count').innerText = Math.min(dist, MAX_DIST);
         document.getElementById('progress-fill').style.width = (Math.min(dist, MAX_DIST) / MAX_DIST * 100) + "%";
         
-        let rank = "實習生";
-        if (score >= 10) rank = "搜救員";
-        if (score >= 25) rank = "英雄";
-        if (score >= 45) rank = "傳奇隊長";
-        document.getElementById('rank-display').innerText = `🐾 汪汪隊：${rank}`;
+        let rankName = "實習生";
+        if (score >= 10) rankName = "搜救員";
+        if (score >= 25) rankName = "英雄";
+        if (score >= 45) rankName = "傳奇隊長";
+        document.getElementById('rank-display').innerText = `🐾 汪汪隊：${rankName}`;
     }
 
     function move() {
@@ -93,7 +97,6 @@
         updateUI();
         if (dist >= MAX_DIST) { endGame(true); return; }
 
-        // 每 3 公里觸發特殊限時關卡
         if (dist % 3 === 0) {
             startSpecialEvent();
         } else if (Math.random() < 0.2) {
@@ -107,7 +110,7 @@
         isSpecial = true;
         document.getElementById('game-container').classList.add('special-mode');
         document.getElementById('timer-display').style.display = 'block';
-        document.getElementById('event-log').innerText = "🔥 觸發噴射背包！限時 10 秒答對直接飛越 2KM！";
+        document.getElementById('event-log').innerText = "🔥 噴射背包啟動！限時 10 秒！";
         timeLeft = 10;
         document.getElementById('seconds').innerText = timeLeft;
         
@@ -118,7 +121,7 @@
                 clearInterval(timerInterval);
                 if (isSpecial) {
                     hp--;
-                    document.getElementById('event-log').innerText = "⏰ 時間到！噴射背包熄火了...";
+                    document.getElementById('event-log').innerText = "⏰ 太慢了，噴射背包過熱扣血！";
                     finishQuestion();
                 }
             }
@@ -136,7 +139,7 @@
 
         let options = [targetAnswer];
         while(options.length < 4) {
-            let wrong = targetAnswer + (Math.floor(Math.random() * 10) - 5);
+            let wrong = targetAnswer + (Math.floor(Math.random() * 11) - 5);
             if(wrong > 0 && !options.includes(wrong)) options.push(wrong);
         }
         options.sort(() => Math.random() - 0.5);
@@ -152,7 +155,7 @@
             score += (currentDog === '阿奇' ? 4 : 2);
             if (isSpecial) {
                 dist += 2;
-                document.getElementById('event-log').innerText = "🚀 噴射成功！瞬間移動 2KM！";
+                document.getElementById('event-log').innerText = "🚀 噴射成功！飛躍了 2KM！";
             } else {
                 document.getElementById('event-log').innerText = "✅ 救援成功！";
             }
@@ -174,12 +177,12 @@
         else {
             document.getElementById('input-area').style.display = 'none';
             document.getElementById('action-buttons').style.display = 'block';
-            document.getElementById('question-area').innerText = "點擊繼續";
+            document.getElementById('question-area').innerText = "點擊前進";
         }
     }
 
     function triggerEvent() {
-        const events = [{t:"吃到點心！",h:1}, {t:"市長求救！",h:0}, {t:"陷阱扣血！",h:-1}];
+        const events = [{t:"吃到點心！",h:1}, {t:"發現小貓！",h:0}, {t:"路面濕滑！",h:-1}];
         let ev = events[Math.floor(Math.random()*events.length)];
         hp += ev.h;
         document.getElementById('event-log').innerText = ev.t;
@@ -189,13 +192,32 @@
 
     function endGame(isWin) {
         clearInterval(timerInterval);
-        endTime = new Date();
+        let endTime = new Date();
         let timeUsed = Math.floor((endTime - startTime) / 1000);
+        
         document.getElementById('game-area').style.display = 'none';
         document.getElementById('end-area').style.display = 'block';
-        document.getElementById('end-title').innerText = isWin ? "🏆 任務成功！" : "💔 體力耗盡";
-        document.getElementById('end-rank').innerText = "🎖️ 最終稱號：" + document.getElementById('rank-display').innerText;
-        document.getElementById('end-time').innerText = `⏱️ 總時間：${Math.floor(timeUsed/60)}分${timeUsed%60}秒`;
+
+        if (isWin) {
+            document.getElementById('end-title').innerText = "🏆 救援大成功！";
+            // 評分邏輯
+            let grade = "C";
+            let color = "#cd7f32"; // 銅
+            if (timeUsed <= 150) { grade = "S"; color = "#ffd700"; }
+            else if (timeUsed <= 300) { grade = "A"; color = "#c0c0c0"; }
+            else if (timeUsed <= 500) { grade = "B"; color = "#b87333"; }
+            
+            document.getElementById('rank-medal').innerText = grade;
+            document.getElementById('rank-medal').style.color = color;
+            document.getElementById('end-rank-text').innerText = document.getElementById('rank-display').innerText;
+            document.getElementById('end-score').innerText = `⭐ 最終分數：${score}`;
+            document.getElementById('end-time').innerText = `⏱️ 總耗時：${Math.floor(timeUsed/60)}分${timeUsed%60}秒`;
+        } else {
+            document.getElementById('end-title').innerText = "💔 體力耗盡";
+            document.getElementById('rank-medal').innerText = "F";
+            document.getElementById('rank-medal').style.color = "#666";
+            document.getElementById('end-rank-text').innerText = "下次再努力！";
+        }
     }
 </script>
 </body>
