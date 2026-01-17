@@ -3,73 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>汪汪隊數學救援：肉鴿版</title>
+    <title>汪汪隊：終極救援任務</title>
     <style>
-        body { font-family: 'Arial', sans-serif; background-color: #f0f8ff; text-align: center; padding: 20px; }
-        #game-container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-        .stats { display: flex; justify-content: space-around; font-size: 1.2rem; margin-bottom: 20px; }
-        .dog-btn { padding: 10px; margin: 5px; cursor: pointer; border: 2px solid #ddd; border-radius: 10px; background: #fff; }
-        .dog-btn:hover { background: #e0f0ff; }
-        #question-area { font-size: 2rem; margin: 20px 0; color: #ff4500; }
-        button { padding: 10px 20px; font-size: 1.1rem; cursor: pointer; background-color: #1e90ff; color: white; border: none; border-radius: 5px; margin: 5px; }
-        button:hover { background-color: #104e8b; }
-        #event-log { color: #555; font-style: italic; min-height: 50px; margin-bottom: 10px; }
+        body { font-family: 'Arial', sans-serif; background: linear-gradient(180deg, #87CEEB 0%, #E0F7FA 100%); text-align: center; padding: 20px; min-height: 100vh; }
+        #game-container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 4px solid #1e90ff; }
+        .stats { display: flex; justify-content: space-around; font-size: 1.3rem; font-weight: bold; background: #f8f9fa; padding: 10px; border-radius: 10px; margin-bottom: 20px; }
+        .progress-bar { width: 100%; background: #eee; height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden; }
+        #progress-fill { width: 0%; height: 100%; background: #4caf50; transition: width 0.5s; }
+        #question-area { font-size: 2.5rem; margin: 25px 0; color: #d32f2f; font-weight: bold; }
+        .rank-tag { display: inline-block; padding: 5px 15px; background: #ffeb3b; border-radius: 20px; font-size: 0.9rem; margin-top: 5px; }
+        button { padding: 12px 25px; font-size: 1.2rem; cursor: pointer; background: #1e90ff; color: white; border: none; border-radius: 50px; margin: 8px; transition: transform 0.2s; box-shadow: 0 4px 0 #104e8b; }
+        button:active { transform: translateY(4px); box-shadow: none; }
+        #event-log { color: #2e7d32; font-size: 1.1rem; min-height: 1.5em; font-weight: bold; }
+        input { font-size: 1.8rem; width: 80px; text-align: center; border: 2px solid #1e90ff; border-radius: 10px; margin-right: 10px; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <h1>🐾 汪汪隊救援任務！</h1>
-    
+    <h2 id="rank-display" style="margin: 0;">🐾 汪汪隊：救援實習生</h2>
     <div id="setup-area">
-        <p>選擇你的救援狗狗：</p>
-        <button class="dog-btn" onclick="startGame('阿奇')">🚔 阿奇<br><small>(答對加1分星星)</small></button>
-        <button class="dog-btn" onclick="startGame('毛毛')">🚒 毛毛<br><small>(機率回體力)</small></button>
+        <p>這次任務，你想派誰出動？</p>
+        <button onclick="startGame('阿奇', '🚔')">🚔 阿奇 (得分王)</button>
+        <button onclick="startGame('毛毛', '🚒')">🚒 毛毛 (醫療犬)</button>
     </div>
 
     <div id="game-area" style="display:none;">
         <div class="stats">
             <span>🦴 <span id="hp">3</span></span>
-            <span>📍 <span id="dist">0</span></span>
             <span>⭐ <span id="score">0</span></span>
         </div>
+        <div class="progress-bar"><div id="progress-fill"></div></div>
+        <div style="font-size: 0.9rem; color: #666;">距離萊德隊長還有: <span id="dist-remain">20</span> 公里</div>
         
-        <div id="event-log">「準備好出發了嗎？」</div>
-        <div id="dog-display" style="font-size: 3rem;">🐶</div>
-        <div id="question-area">點擊按鈕前進</div>
+        <div id="event-log"></div>
+        <div id="dog-display" style="font-size: 4rem; margin: 10px;">🐶</div>
+        <div id="question-area">準備好了嗎？</div>
+        
+        <div id="input-area" style="display:none;">
+            <input type="number" id="ans" autofocus>
+            <button onclick="checkAnswer()">確認答案</button>
+        </div>
         
         <div id="action-buttons">
-            <button onclick="move('normal')">⬅️ 前進</button>
-            <button onclick="move('explore')">⬆️ 探索 (隨機事件)</button>
+            <button onclick="move()">🛞 前進救援</button>
         </div>
     </div>
 
-    <div id="over-area" style="display:none;">
-        <h2>❌ 任務結束</h2>
-        <p id="final-stats"></p>
-        <button onclick="location.reload()">重新出發</button>
+    <div id="end-area" style="display:none;">
+        <h1 id="end-title">任務結束</h1>
+        <p id="end-msg"></p>
+        <button onclick="location.reload()">再玩一次</button>
     </div>
 </div>
 
 <script>
-    let hp = 3, dist = 0, score = 0, currentDog = "", targetAnswer = 0;
+    let hp = 3, score = 0, dist = 0, currentDog = "", targetAnswer = 0;
+    const MAX_DIST = 20; // 終點距離
 
-    function startGame(dog) {
+    function startGame(dog, icon) {
         currentDog = dog;
         document.getElementById('setup-area').style.display = 'none';
         document.getElementById('game-area').style.display = 'block';
-        document.getElementById('event-log').innerText = `${currentDog} 準備好出發救援了！`;
-        if(dog === '阿奇') document.getElementById('dog-display').innerText = '🚔';
-        if(dog === '毛毛') document.getElementById('dog-display').innerText = '🚒';
+        document.getElementById('dog-display').innerText = icon;
+        updateUI();
     }
 
-    function move(type) {
-        dist++;
-        document.getElementById('dist').innerText = dist;
+    function updateUI() {
+        document.getElementById('hp').innerText = hp;
+        document.getElementById('score').innerText = score;
+        document.getElementById('dist-remain').innerText = MAX_DIST - dist;
+        document.getElementById('progress-fill').style.width = (dist / MAX_DIST * 100) + "%";
         
+        // 級別更新系統
+        let rank = "救援實習生";
+        if (score >= 10) rank = "英勇搜救員";
+        if (score >= 20) rank = "超能狗狗英雄";
+        if (score >= 35) rank = "傳奇救援隊長";
+        document.getElementById('rank-display').innerText = `🐾 汪汪隊：${rank}`;
+    }
+
+    function move() {
+        dist++;
+        updateUI();
+        if (dist >= MAX_DIST) {
+            endGame(true);
+            return;
+        }
+
         // 隨機觸發事件
-        let rand = Math.random();
-        if (type === 'explore' && rand < 0.4) {
+        if (Math.random() < 0.2) {
             triggerEvent();
         } else {
             generateQuestion();
@@ -78,59 +101,61 @@
 
     function triggerEvent() {
         const events = [
-            { text: "遇到了韓丁那市長的搗蛋貓！", hp: -1, stars: 0 },
-            { text: "幫市長找到了小雞雞！獲得星星！", hp: 0, stars: 5 },
-            { text: "喝到了萊德隊長的能量飲料！", hp: 1, stars: 0 }
+            { text: "遇到了市長的障礙物，快解開它！", hp: 0 },
+            { text: "萊德隊長投送了狗狗餅乾！", hp: 1 },
+            { text: "韓丁那市長在路上挖洞！", hp: -1 }
         ];
         let ev = events[Math.floor(Math.random() * events.length)];
         hp += ev.hp;
-        score += ev.stars;
         document.getElementById('event-log').innerText = ev.text;
-        updateStats();
-        checkGameOver();
-        generateQuestion();
+        if (hp <= 0) endGame(false);
+        else generateQuestion();
     }
 
     function generateQuestion() {
+        document.getElementById('action-buttons').style.display = 'none';
+        document.getElementById('input-area').style.display = 'block';
         let n1 = Math.floor(Math.random() * 8) + 2;
         let n2 = Math.floor(Math.random() * 8) + 2;
         targetAnswer = n1 * n2;
-        document.getElementById('question-area').innerHTML = `
-            ${n1} × ${n2} = ?<br>
-            <input type="number" id="ans" style="width:60px; font-size:1.5rem;">
-            <button onclick="checkAnswer()">確認</button>
-        `;
+        document.getElementById('question-area').innerText = `${n1} × ${n2} = ?`;
+        document.getElementById('ans').value = "";
+        document.getElementById('ans').focus();
     }
 
     function checkAnswer() {
         let userAns = parseInt(document.getElementById('ans').value);
         if (userAns === targetAnswer) {
-            score += (currentDog === '阿奇' ? 2 : 1);
-            document.getElementById('event-log').innerText = "太棒了！答對了！";
-            // 毛毛特技：10%機率回血
-            if(currentDog === '毛毛' && Math.random() < 0.2) {
+            score += (currentDog === '阿奇' ? 3 : 2);
+            document.getElementById('event-log').innerText = "✅ 太棒了！救援成功！";
+            if (currentDog === '毛毛' && Math.random() < 0.3) {
                 hp++;
-                document.getElementById('event-log').innerText = "毛毛發動急救特技！回復1體力！";
+                document.getElementById('event-log').innerText = "🚒 毛毛發動急救補血！";
             }
         } else {
             hp--;
-            document.getElementById('event-log').innerText = `哎呀，答錯了，正確是 ${targetAnswer}`;
+            document.getElementById('event-log').innerText = `❌ 哎呀！正確答案是 ${targetAnswer}`;
         }
-        updateStats();
-        checkGameOver();
-        if(hp > 0) document.getElementById('question-area').innerText = "點擊按鈕前進";
-    }
-
-    function updateStats() {
-        document.getElementById('hp').innerText = hp;
-        document.getElementById('score').innerText = score;
-    }
-
-    function checkGameOver() {
+        
+        updateUI();
         if (hp <= 0) {
-            document.getElementById('game-area').style.display = 'none';
-            document.getElementById('over-area').style.display = 'block';
-            document.getElementById('final-stats').innerText = `拯救了 ${dist} 公里遠的小動物，獲得了 ${score} 顆星星！`;
+            endGame(false);
+        } else {
+            document.getElementById('input-area').style.display = 'none';
+            document.getElementById('action-buttons').style.display = 'block';
+            document.getElementById('question-area').innerText = "點擊前進";
+        }
+    }
+
+    function endGame(isWin) {
+        document.getElementById('game-area').style.display = 'none';
+        document.getElementById('end-area').style.display = 'block';
+        if (isWin) {
+            document.getElementById('end-title').innerText = "🏆 任務圓滿成功！";
+            document.getElementById('end-msg').innerText = `恭喜小英雄！你抵達了終點，萊德隊長為你頒發了榮譽勳章！\n你最終的等級是：${document.getElementById('rank-display').innerText}`;
+        } else {
+            document.getElementById('end-title').innerText = "💔 體力用完了";
+            document.getElementById('end-msg').innerText = "別灰心，萊德隊長說下次一定可以做得更好！";
         }
     }
 </script>
