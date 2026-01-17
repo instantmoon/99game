@@ -3,348 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>汪汪隊數學救援任務</title>
+    <title>汪汪隊數學救援：肉鴿版</title>
     <style>
-        :root {
-            --paw-blue: #007BFF;
-            --paw-red: #DC3545;
-            --paw-yellow: #FFC107;
-            --bg-dark: #2c3e50;
-            --text-light: #ecf0f1;
-        }
-
-        body {
-            font-family: "Microsoft JhengHei", sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        #game-area {
-            background: linear-gradient(145deg, #34495e, #2c3e50);
-            border: 8px solid var(--paw-yellow);
-            border-radius: 25px;
-            padding: 25px;
-            width: 550px;
-            text-align: center;
-            box-shadow: 0 0 40px rgba(255, 193, 7, 0.4);
-            position: relative;
-            box-sizing: border-box; /* 確保padding不會撐大 */
-        }
-
-        h1 {
-            color: var(--paw-yellow);
-            text-shadow: 3px 3px 0px var(--paw-blue);
-            font-size: 2.8rem;
-            margin-top: 10px;
-        }
-
-        .status-bar {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background-color: var(--paw-red);
-            padding: 8px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: white;
-            text-shadow: 1px 1px 0px #000;
-        }
-
-        .status-item span {
-            margin-left: 8px;
-        }
-
-        #map-display {
-            font-size: 3rem;
-            margin: 20px 0;
-            min-height: 80px;
-        }
-
-        #event-message {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
-            min-height: 60px;
-            line-height: 1.5;
-        }
-
-        #question-display {
-            font-size: 3.5rem;
-            font-weight: bold;
-            color: var(--paw-yellow);
-            text-shadow: 2px 2px 0px var(--paw-blue);
-            margin: 20px 0;
-        }
-
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        button {
-            background-color: var(--paw-blue);
-            color: white;
-            border: 4px solid var(--paw-yellow);
-            border-radius: 12px;
-            padding: 15px;
-            font-size: 1.6rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s;
-        }
-
-        button:hover {
-            transform: translateY(-3px);
-            background-color: #0056b3;
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        #direction-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .direction-button {
-            background-color: var(--paw-red);
-            font-size: 1.5rem;
-            padding: 12px;
-            border: 3px solid var(--paw-yellow);
-        }
-        .direction-button:hover {
-            background-color: #c82333;
-        }
-
-        #game-over-screen {
-            display: none;
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            border-radius: 20px;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-        }
-        #game-over-screen button {
-            background-color: var(--paw-yellow);
-            color: var(--bg-dark);
-            margin-top: 20px;
-            font-size: 1.8rem;
-            border: none;
-        }
-        #game-over-screen button:hover {
-            background-color: #e0a800;
-        }
-
-        /* 隱藏元素 */
-        .hidden { display: none; }
-        .visible { display: block; }
-        .flex-visible { display: flex; }
+        body { font-family: 'Arial', sans-serif; background-color: #f0f8ff; text-align: center; padding: 20px; }
+        #game-container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .stats { display: flex; justify-content: space-around; font-size: 1.2rem; margin-bottom: 20px; }
+        .dog-btn { padding: 10px; margin: 5px; cursor: pointer; border: 2px solid #ddd; border-radius: 10px; background: #fff; }
+        .dog-btn:hover { background: #e0f0ff; }
+        #question-area { font-size: 2rem; margin: 20px 0; color: #ff4500; }
+        button { padding: 10px 20px; font-size: 1.1rem; cursor: pointer; background-color: #1e90ff; color: white; border: none; border-radius: 5px; margin: 5px; }
+        button:hover { background-color: #104e8b; }
+        #event-log { color: #555; font-style: italic; min-height: 50px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<div id="game-area">
-    <h1>汪汪隊救援任務！</h1>
-
-    <div class="status-bar">
-        <div class="status-item">🦴 <span id="hp">3</span></div>
-        <div class="status-item">🗺️ <span id="level">1</span></div>
-        <div class="status-item">⭐ <span id="score">0</span></div>
+<div id="game-container">
+    <h1>🐾 汪汪隊救援任務！</h1>
+    
+    <div id="setup-area">
+        <p>選擇你的救援狗狗：</p>
+        <button class="dog-btn" onclick="startGame('阿奇')">🚔 阿奇<br><small>(答對加1分星星)</small></button>
+        <button class="dog-btn" onclick="startGame('毛毛')">🚒 毛毛<br><small>(機率回體力)</small></button>
     </div>
 
-    <div id="map-display">🐶</div>
-    <div id="event-message">「萊德隊長遇到麻煩了！汪汪隊，準備出動！」</div>
-
-    <div id="math-challenge" class="hidden">
-        <div id="question-display">? × ?</div>
-        <div class="options-grid" id="options"></div>
-    </div>
-
-    <div id="movement-controls" class="visible">
-        <div id="direction-buttons">
-            <button class="direction-button" onclick="move('left')">⬅️ 前進</button>
-            <button class="direction-button" onclick="move('forward')">⬆️ 探索</button>
-            <button class="direction-button" onclick="move('right')">➡️ 救援</button>
+    <div id="game-area" style="display:none;">
+        <div class="stats">
+            <span>🦴 <span id="hp">3</span></span>
+            <span>📍 <span id="dist">0</span></span>
+            <span>⭐ <span id="score">0</span></span>
+        </div>
+        
+        <div id="event-log">「準備好出發了嗎？」</div>
+        <div id="dog-display" style="font-size: 3rem;">🐶</div>
+        <div id="question-area">點擊按鈕前進</div>
+        
+        <div id="action-buttons">
+            <button onclick="move('normal')">⬅️ 前進</button>
+            <button onclick="move('explore')">⬆️ 探索 (隨機事件)</button>
         </div>
     </div>
 
-    <div id="game-over-screen">
-        <div style="font-size: 4rem; margin-bottom: 20px;">😭</div>
-        <h2>任務失敗！</h2>
-        <p>萊德隊長還在等待你的救援！</p>
-        <p>你拯救了 <span id="final-score">0</span> 位小動物。</p>
-        <button onclick="startGame()">再次出動！</button>
+    <div id="over-area" style="display:none;">
+        <h2>❌ 任務結束</h2>
+        <p id="final-stats"></p>
+        <button onclick="location.reload()">重新出發</button>
     </div>
-
 </div>
 
 <script>
-    const pawEmojis = {
-        start: "🐶", rescue: "🐾", obstacle: "🚧", math: "💡", bonus: "🦴", trap: "⚡",
-        forest: "🌳", town: "🏘️", snow: "🌨️", water: "🌊"
-    };
-    const pawMembers = ["🐶 阿奇", "🚒 毛毛", "🚁 天天", "🚜 小礫", "♻️ 灰灰", "💧 路馬"];
+    let hp = 3, dist = 0, score = 0, currentDog = "", targetAnswer = 0;
 
-    let currentHP = 3;
-    let currentLevel = 1;
-    let currentScore = 0; // 成功救援次數
-    let currentCorrectAnswer = 0;
-
-    const dialogueMessages = {
-        start: "汪汪隊集合！萊德隊長需要我們！",
-        move: (direction) => `你選擇向${direction}前進！`,
-        mathQuestion: (member) => `${member} 發出求救訊號！你需要解決數學題才能幫他！`,
-        correct: "太棒了！成功救援！+1 🦴",
-        incorrect: "喔不！狗狗力量減弱了！-1 🦴",
-        foundBone: "發現補給品！+1 🦴",
-        hitTrap: "踩到陷阱了！-1 🦴",
-        levelUp: (level) => `你抵達了第 ${level} 個區域！`,
-        gameOver: "任務失敗，我們下次會更努力的！"
-    };
-
-    const mathChallengeDiv = document.getElementById('math-challenge');
-    const movementControlsDiv = document.getElementById('movement-controls');
-    const gameOverScreen = document.getElementById('game-over-screen');
-
-    function updateStatus() {
-        document.getElementById('hp').innerText = currentHP;
-        document.getElementById('level').innerText = currentLevel;
-        document.getElementById('score').innerText = currentScore;
-        document.getElementById('map-display').innerText = pawEmojis.rescue.repeat(currentScore); // 用救援數顯示進度
-        if (currentHP <= 0) {
-            endGame();
-        }
+    function startGame(dog) {
+        currentDog = dog;
+        document.getElementById('setup-area').style.display = 'none';
+        document.getElementById('game-area').style.display = 'block';
+        document.getElementById('event-log').innerText = `${currentDog} 準備好出發救援了！`;
+        if(dog === '阿奇') document.getElementById('dog-display').innerText = '🚔';
+        if(dog === '毛毛') document.getElementById('dog-display').innerText = '🚒';
     }
 
-    function setDialogue(message) {
-        document.getElementById('event-message').innerText = message;
-    }
-
-    function generateMathQuestion() {
-        const num1 = Math.floor(Math.random() * 9) + 1; // 1到9
-        const num2 = Math.floor(Math.random() * 9) + 1; // 1到9
-        currentCorrectAnswer = num1 * num2;
-
-        document.getElementById('question-display').innerText = `${num1} × ${num2} = ?`;
-
-        let options = [currentCorrectAnswer];
-        while (options.length < 4) {
-            let wrong = (Math.floor(Math.random() * 9) + 1) * (Math.floor(Math.random() * 9) + 1);
-            // 確保錯誤選項不重複且不等於正確答案，且不要產生負數
-            if (!options.includes(wrong) && wrong > 0) options.push(wrong);
-        }
-        options.sort(() => Math.random() - 0.5); // 洗牌
-
-        const optionsDiv = document.getElementById('options');
-        optionsDiv.innerHTML = "";
-        options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.innerText = opt;
-            btn.onclick = () => checkAnswer(opt);
-            optionsDiv.appendChild(btn);
-        });
-
-        mathChallengeDiv.classList.remove('hidden');
-        movementControlsDiv.classList.add('hidden');
-    }
-
-    function checkAnswer(selectedAnswer) {
-        if (selectedAnswer === currentCorrectAnswer) {
-            currentHP = Math.min(currentHP + 1, 5); // 最多5點HP
-            currentScore++;
-            setDialogue(dialogueMessages.correct);
-        } else {
-            currentHP--;
-            setDialogue(dialogueMessages.incorrect);
-        }
-        updateStatus();
+    function move(type) {
+        dist++;
+        document.getElementById('dist').innerText = dist;
         
-        mathChallengeDiv.classList.add('hidden');
-        movementControlsDiv.classList.remove('hidden');
-        if (currentHP > 0) { // 如果HP還有，才進入下一個事件
-            setTimeout(nextEvent, 1500);
+        // 隨機觸發事件
+        let rand = Math.random();
+        if (type === 'explore' && rand < 0.4) {
+            triggerEvent();
+        } else {
+            generateQuestion();
         }
     }
 
-    function move(direction) {
-        setDialogue(dialogueMessages.move(direction === 'left' ? '左邊' : (direction === 'right' ? '右邊' : '前方')));
-        currentLevel++;
-        setDialogue(dialogueMessages.levelUp(currentLevel));
-        updateStatus();
-        setTimeout(nextEvent, 1000); // 選擇後馬上觸發事件
+    function triggerEvent() {
+        const events = [
+            { text: "遇到了韓丁那市長的搗蛋貓！", hp: -1, stars: 0 },
+            { text: "幫市長找到了小雞雞！獲得星星！", hp: 0, stars: 5 },
+            { text: "喝到了萊德隊長的能量飲料！", hp: 1, stars: 0 }
+        ];
+        let ev = events[Math.floor(Math.random() * events.length)];
+        hp += ev.hp;
+        score += ev.stars;
+        document.getElementById('event-log').innerText = ev.text;
+        updateStats();
+        checkGameOver();
+        generateQuestion();
     }
 
-    function nextEvent() {
-        if (currentHP <= 0) {
-            endGame();
-            return;
+    function generateQuestion() {
+        let n1 = Math.floor(Math.random() * 8) + 2;
+        let n2 = Math.floor(Math.random() * 8) + 2;
+        targetAnswer = n1 * n2;
+        document.getElementById('question-area').innerHTML = `
+            ${n1} × ${n2} = ?<br>
+            <input type="number" id="ans" style="width:60px; font-size:1.5rem;">
+            <button onclick="checkAnswer()">確認</button>
+        `;
+    }
+
+    function checkAnswer() {
+        let userAns = parseInt(document.getElementById('ans').value);
+        if (userAns === targetAnswer) {
+            score += (currentDog === '阿奇' ? 2 : 1);
+            document.getElementById('event-log').innerText = "太棒了！答對了！";
+            // 毛毛特技：10%機率回血
+            if(currentDog === '毛毛' && Math.random() < 0.2) {
+                hp++;
+                document.getElementById('event-log').innerText = "毛毛發動急救特技！回復1體力！";
+            }
+        } else {
+            hp--;
+            document.getElementById('event-log').innerText = `哎呀，答錯了，正確是 ${targetAnswer}`;
         }
+        updateStats();
+        checkGameOver();
+        if(hp > 0) document.getElementById('question-area').innerText = "點擊按鈕前進";
+    }
 
-        const eventType = Math.random();
-        if (eventType < 0.5) { // 數學挑戰
-            const randomMember = pawMembers[Math.floor(Math.random() * pawMembers.length)];
-            setDialogue(dialogueMessages.mathQuestion(randomMember));
-            generateMathQuestion();
-        } else if (eventType < 0.75) { // 發現骨頭
-            currentHP = Math.min(currentHP + 1, 5);
-            setDialogue(dialogueMessages.foundBone);
-            updateStatus();
-            // 自動回到移動控制，因為沒有互動
-            setTimeout(() => {
-                mathChallengeDiv.classList.add('hidden');
-                movementControlsDiv.classList.remove('hidden');
-                setDialogue(dialogueMessages.move("前方")); // 提示可以繼續移動
-            }, 1500);
-        } else { // 踩到陷阱
-            currentHP--;
-            setDialogue(dialogueMessages.hitTrap);
-            updateStatus();
-            // 自動回到移動控制
-            setTimeout(() => {
-                mathChallengeDiv.classList.add('hidden');
-                movementControlsDiv.classList.remove('hidden');
-                setDialogue(dialogueMessages.move("前方")); // 提示可以繼續移動
-            }, 1500);
+    function updateStats() {
+        document.getElementById('hp').innerText = hp;
+        document.getElementById('score').innerText = score;
+    }
+
+    function checkGameOver() {
+        if (hp <= 0) {
+            document.getElementById('game-area').style.display = 'none';
+            document.getElementById('over-area').style.display = 'block';
+            document.getElementById('final-stats').innerText = `拯救了 ${dist} 公里遠的小動物，獲得了 ${score} 顆星星！`;
         }
     }
-
-    function startGame() {
-        currentHP = 3;
-        currentLevel = 1;
-        currentScore = 0;
-        gameOverScreen.style.display = 'none'; // 隱藏結束畫面
-        mathChallengeDiv.classList.add('hidden'); // 隱藏數學題
-        movementControlsDiv.classList.remove('hidden'); // 顯示移動按鈕
-        setDialogue(dialogueMessages.start);
-        updateStatus();
-        document.getElementById('map-display').innerText = "🐶"; // 起始地圖顯示
-    }
-
-    function endGame() {
-        document.getElementById('final-score').innerText = currentScore;
-        gameOverScreen.style.display = 'flex';
-        mathChallengeDiv.classList.add('hidden');
-        movementControlsDiv.classList.add('hidden');
-        setDialogue(dialogueMessages.gameOver);
-    }
-
-    // 初始化遊戲
-    startGame();
 </script>
 
 </body>
