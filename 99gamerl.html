@@ -3,19 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>汪汪隊：終極救援任務 (進階版)</title>
+    <title>汪汪隊：終極救援任務 (按鈕版)</title>
     <style>
         body { font-family: 'Arial', sans-serif; background: linear-gradient(180deg, #87CEEB 0%, #E0F7FA 100%); text-align: center; padding: 20px; min-height: 100vh; }
         #game-container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 4px solid #1e90ff; }
         .stats { display: flex; justify-content: space-around; font-size: 1.3rem; font-weight: bold; background: #f8f9fa; padding: 10px; border-radius: 10px; margin-bottom: 20px; }
         .progress-bar { width: 100%; background: #eee; height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden; }
         #progress-fill { width: 0%; height: 100%; background: #4caf50; transition: width 0.5s; }
-        #question-area { font-size: 2.5rem; margin: 25px 0; color: #d32f2f; font-weight: bold; }
-        button { padding: 12px 25px; font-size: 1.2rem; cursor: pointer; background: #1e90ff; color: white; border: none; border-radius: 50px; margin: 8px; transition: transform 0.2s; box-shadow: 0 4px 0 #104e8b; }
-        button:active { transform: translateY(4px); box-shadow: none; }
+        #question-area { font-size: 2.8rem; margin: 20px 0; color: #d32f2f; font-weight: bold; }
         .dog-desc { font-size: 0.9rem; color: #444; margin-bottom: 15px; background: #fffde7; padding: 10px; border-radius: 10px; line-height: 1.4; }
         #event-log { color: #2e7d32; font-size: 1.1rem; min-height: 1.5em; font-weight: bold; margin: 10px 0; }
-        input { font-size: 1.8rem; width: 100px; text-align: center; border: 2px solid #1e90ff; border-radius: 10px; margin: 10px; }
+        
+        /* 四選一按鈕樣式 */
+        .option-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .option-btn { padding: 20px; font-size: 1.8rem; background: #ff9800; color: white; border: none; border-radius: 15px; cursor: pointer; box-shadow: 0 5px 0 #e68a00; transition: 0.1s; }
+        .option-btn:active { transform: translateY(4px); box-shadow: none; }
+        
+        button.action-btn { padding: 12px 25px; font-size: 1.2rem; cursor: pointer; background: #1e90ff; color: white; border: none; border-radius: 50px; margin: 8px; box-shadow: 0 4px 0 #104e8b; }
     </style>
 </head>
 <body>
@@ -24,20 +28,18 @@
     <h2 id="rank-display" style="margin: 0;">🐾 汪汪隊：救援準備</h2>
     
     <div id="setup-area">
-        <p style="font-weight: bold;">準備好出動了嗎？請選擇隊員：</p>
+        <p style="font-weight: bold;">選擇隊員準備出發：</p>
         <div class="dog-desc">
             <strong>🚔 阿奇 (得分專家)</strong><br>
-            擁有超強警察直覺，答對時能獲得【額外星星】！<br>
-            適合想快速升級的小英雄。
+            答對獲得【4顆星】，升級速度最快！
         </div>
-        <button onclick="startGame('阿奇', '🚔')">出動阿奇！</button>
+        <button class="action-btn" onclick="startGame('阿奇', '🚔')">出動阿奇！</button>
         
         <div class="dog-desc" style="margin-top:20px;">
             <strong>🚒 毛毛 (醫療專家)</strong><br>
-            隨身攜帶急救包，答對時有機率【恢復 1 點體力】！<br>
-            適合想走得更遠的小英雄。
+            答對有 35% 機率【補血 1 點】，最不容易失敗！
         </div>
-        <button onclick="startGame('毛毛', '🚒')" style="background-color: #f44336; box-shadow: 0 4px 0 #b71c1c;">出動毛毛！</button>
+        <button class="action-btn" onclick="startGame('毛毛', '🚒')" style="background-color: #f44336; box-shadow: 0 4px 0 #b71c1c;">出動毛毛！</button>
     </div>
 
     <div id="game-area" style="display:none;">
@@ -53,13 +55,12 @@
         <div id="question-area"></div>
         
         <div id="input-area" style="display:none;">
-            <input type="number" id="ans" autofocus placeholder="答案">
-            <br>
-            <button onclick="checkAnswer()">確認答案</button>
+            <div class="option-container" id="options">
+                </div>
         </div>
         
         <div id="action-buttons">
-            <button onclick="move()">🛞 繼續前進</button>
+            <button class="action-btn" onclick="move()">🛞 繼續前進</button>
         </div>
     </div>
 
@@ -71,7 +72,7 @@
             <p id="end-score"></p>
             <p id="end-time" style="color: #d32f2f; font-weight: bold;"></p>
         </div>
-        <button onclick="location.reload()">重新出發</button>
+        <button class="action-btn" onclick="location.reload()">重新出發</button>
     </div>
 </div>
 
@@ -82,7 +83,7 @@
 
     function startGame(dog, icon) {
         currentDog = dog;
-        startTime = new Date(); // 紀錄開始時間
+        startTime = new Date();
         document.getElementById('setup-area').style.display = 'none';
         document.getElementById('game-area').style.display = 'block';
         document.getElementById('dog-display').innerText = icon;
@@ -96,9 +97,9 @@
         document.getElementById('progress-fill').style.width = (dist / MAX_DIST * 100) + "%";
         
         let rank = "實習生";
-        if (score >= 10) rank = "搜救員";
-        if (score >= 20) rank = "英雄";
-        if (score >= 35) rank = "傳奇隊長";
+        if (score >= 15) rank = "搜救員";
+        if (score >= 35) rank = "英雄";
+        if (score >= 60) rank = "傳奇隊長";
         document.getElementById('rank-display').innerText = `🐾 汪汪隊：${rank}`;
     }
 
@@ -119,9 +120,9 @@
 
     function triggerEvent() {
         const events = [
-            { text: "前方有障礙物，快用算術解決！", hp: 0 },
-            { text: "吃到了狗狗點心，體力恢復！", hp: 1 },
-            { text: "糟糕！遇到了韓丁那市長的陷阱！", hp: -1 }
+            { text: "萊德隊長送來了狗狗零食！", hp: 1 },
+            { text: "前方有障礙物，必須算出答案才能通過！", hp: 0 },
+            { text: "不小心掉進了韓丁那市長的陷阱！", hp: -1 }
         ];
         let ev = events[Math.floor(Math.random() * events.length)];
         hp += ev.hp;
@@ -133,26 +134,42 @@
     function generateQuestion() {
         document.getElementById('action-buttons').style.display = 'none';
         document.getElementById('input-area').style.display = 'block';
+        
         let n1 = Math.floor(Math.random() * 8) + 2;
         let n2 = Math.floor(Math.random() * 8) + 2;
         targetAnswer = n1 * n2;
         document.getElementById('question-area').innerText = `${n1} × ${n2} = ?`;
-        document.getElementById('ans').value = "";
-        document.getElementById('ans').focus();
+
+        // 生成 4 個選項
+        let options = [targetAnswer];
+        while(options.length < 4) {
+            let offset = Math.floor(Math.random() * 10) - 5; // 正負 5 之間的誤差
+            let wrong = targetAnswer + offset;
+            if(wrong > 0 && !options.includes(wrong)) {
+                options.push(wrong);
+            }
+        }
+        // 洗牌選項
+        options.sort(() => Math.random() - 0.5);
+
+        let optionsHtml = "";
+        options.forEach(opt => {
+            optionsHtml += `<button class="option-btn" onclick="checkAnswer(${opt})">${opt}</button>`;
+        });
+        document.getElementById('options').innerHTML = optionsHtml;
     }
 
-    function checkAnswer() {
-        let userAns = parseInt(document.getElementById('ans').value);
+    function checkAnswer(userAns) {
         if (userAns === targetAnswer) {
-            score += (currentDog === '阿奇' ? 4 : 2); // 阿奇得分更高
-            document.getElementById('event-log').innerText = "✅ 救援成功！";
+            score += (currentDog === '阿奇' ? 4 : 2);
+            document.getElementById('event-log').innerText = "✅ 沒錯！就是 " + targetAnswer + "！";
             if (currentDog === '毛毛' && Math.random() < 0.35) {
                 hp++;
                 document.getElementById('event-log').innerText = "🚒 毛毛幫大家補血了！";
             }
         } else {
             hp--;
-            document.getElementById('event-log').innerText = `❌ 答錯了，正確是 ${targetAnswer}`;
+            document.getElementById('event-log').innerText = `❌ 哎呀！正確答案是 ${targetAnswer}`;
         }
         
         updateUI();
@@ -161,7 +178,7 @@
         } else {
             document.getElementById('input-area').style.display = 'none';
             document.getElementById('action-buttons').style.display = 'block';
-            document.getElementById('question-area').innerText = "準備下次前進";
+            document.getElementById('question-area').innerText = "準備前進";
         }
     }
 
@@ -174,7 +191,7 @@
         document.getElementById('game-area').style.display = 'none';
         document.getElementById('end-area').style.display = 'block';
         
-        document.getElementById('end-title').innerText = isWin ? "🏆 任務成功！" : "💔 體力耗盡";
+        document.getElementById('end-title').innerText = isWin ? "🏆 任務圓滿成功！" : "💔 體力耗盡";
         document.getElementById('end-rank').innerText = "🎖️ 最終軍階：" + document.getElementById('rank-display').innerText;
         document.getElementById('end-dist').innerText = "📍 救援距離：" + dist + " 公里";
         document.getElementById('end-score').innerText = "⭐ 獲得星星：" + score + " 顆";
